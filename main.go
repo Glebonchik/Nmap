@@ -6,6 +6,7 @@ import (
 	"log"
 	"strings"
 
+	"example.com/nmap/api"
 	"example.com/nmap/reporter"
 	"example.com/nmap/scanner"
 	util "example.com/nmap/utils"
@@ -19,13 +20,27 @@ func main() {
 	html := flag.String("html", "", "Опциональный HTML файл отчёта")
 	concurrency := flag.Int("c", 200, "Число concurrent подключений")
 	to := flag.Int("timeout", 1500, "Таймаут для подключения и чтения (ms)")
+	apiFlag := flag.String("api", "", "start HTTP API (e.g. :8080)")
 	flag.Parse()
 
-	if *cidr == "" && *rangeIP == "" {
-		log.Fatal("Укажите либо -cidr, либо -range")
+	// Если указан -api, запускаем API-сервер в фоновом режиме.
+	if strings.TrimSpace(*apiFlag) != "" {
+		go api.StartAPIServer(*apiFlag)
+		log.Printf("API server started on %s", *apiFlag)
 	}
 
-	// Соберём список IP
+	// Если не указаны ни -cidr, ни -range, и -api был указан — просто заблокироваться,
+	// чтобы API оставался доступен (это режим 'API-only').
+	if *cidr == "" && *rangeIP == "" {
+		if strings.TrimSpace(*apiFlag) != "" {
+			// блокируем главный поток, API работает в горутине
+			select {}
+		} else {
+			log.Fatal("Укажите либо -cidr, либо -range (или запустите с -api для режима сервера)")
+		}
+	}
+
+	// Если тут — значит у нас есть цель для сканирования
 	var ips []string
 	var err error
 	if *cidr != "" {
@@ -40,7 +55,6 @@ func main() {
 		}
 	}
 
-	// Парсим порты
 	portList, err := scanner.ParsePorts(*ports)
 	if err != nil {
 		log.Fatalf("Не удалось распарсить порты: %v", err)
@@ -67,6 +81,13 @@ func main() {
 			log.Fatalf("Не удалось сохранить HTML: %v", err)
 		}
 		fmt.Printf("Saved HTML report: %s\n", *html)
+	}
+
+	// Если сервер API был запущен, не завершаем сразу: даём ему время поработать.
+	if strings.TrimSpace(*apiFlag) != "" {
+		fmt.Println("Scan finished. API server still running. Press Ctrl+C to exit.")
+		// просто блокируем главный поток, чтобы процесс не завершался немедленно
+		select {}
 	}
 
 	fmt.Println("Done")
