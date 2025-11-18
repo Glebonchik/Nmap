@@ -18,3 +18,9 @@ C:\Projects\Golang\Nmap\nmapGUI\obj\Debug\net10.0-windows\refint\nmapGUI.dll
 C:\Projects\Golang\Nmap\nmapGUI\obj\Debug\net10.0-windows\nmapGUI.pdb
 C:\Projects\Golang\Nmap\nmapGUI\obj\Debug\net10.0-windows\nmapGUI.genruntimeconfig.cache
 C:\Projects\Golang\Nmap\nmapGUI\obj\Debug\net10.0-windows\ref\nmapGUI.dll
+C:\Projects\Golang\Nmap\nmapGUI\obj\Debug\net10.0-windows\AboutWindow.baml
+C:\Projects\Golang\Nmap\nmapGUI\obj\Debug\net10.0-windows\AboutWindow.g.cs
+C:\Projects\Golang\Nmap\nmapGUI\obj\Debug\net10.0-windows\ResultWindow.baml
+C:\Projects\Golang\Nmap\nmapGUI\obj\Debug\net10.0-windows\ResultWindow.g.cs
+C:\Projects\Golang\Nmap\nmapGUI\obj\Debug\net10.0-windows\ProgressWindow.baml
+C:\Projects\Golang\Nmap\nmapGUI\obj\Debug\net10.0-windows\ProgressWindow.g.cs

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("nmapGUI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e6664af97fdb020ed02ad13a40f8305eb8a5f36d")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8885bb062fb71069f88e4192d568a374a51de3cc")]
 [assembly: System.Reflection.AssemblyProductAttribute("nmapGUI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("nmapGUI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
