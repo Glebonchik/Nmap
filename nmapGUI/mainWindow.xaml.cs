@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace nmapGUI
@@ -13,79 +14,105 @@ namespace nmapGUI
             InitializeComponent();
         }
 
-        private void ScanButton_Click(object sender, RoutedEventArgs e)
+        private async void ScanButton_Click(object sender, RoutedEventArgs e)
         {
-            string ip = IpTextBox.Text.Trim();
-            string ports = PortsTextBox.Text.Trim();
+            string ip = IpInput.Text.Trim();
+            string startPort = StartPortInput.Text.Trim();
+            string endPort = EndPortInput.Text.Trim();
 
-            if (string.IsNullOrEmpty(ip))
+            if (string.IsNullOrEmpty(ip) || string.IsNullOrEmpty(startPort) || string.IsNullOrEmpty(endPort))
             {
-                MessageBox.Show("Введите IP/CIDR/Range.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Заполните все поля!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            // Путь к Go exe
-            string goExe = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"go","scanner.exe");
+            // путь к scanner.exe
+            string exePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "go", "scanner.exe");
+            string exeDir = Path.GetDirectoryName(exePath)!;
+            string resultJsonPath = Path.Combine(exeDir, "results.json");
 
-            if (!File.Exists(goExe))
+            if (!File.Exists(exePath))
             {
-                MessageBox.Show("Файл scanner.exe не найден!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"scanner.exe не найден:\n{exePath}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            // Формируем аргументы
-            string args = $"-range {ip} -ports {ports} -out result.json";
+            // окно прогресса
+            ProgressWindow progress = new ProgressWindow();
+            progress.Show();
 
-            // Запускаем процесс
+            try
+            {
+                // запускаем scanner.exe асинхронно
+                await Task.Run(() => RunScanner(exePath, ip, startPort, endPort));
+
+                progress.Close();
+
+                // ЖДЕМ появления файла results.json (иногда Go пишет с задержкой)
+                await WaitForFile(resultJsonPath, timeoutMs: 5000);
+
+                string json;
+
+                if (File.Exists(resultJsonPath))
+                {
+                    json = File.ReadAllText(resultJsonPath, Encoding.UTF8).Trim();
+                }
+                else
+                {
+                    json = "{}";
+                }
+
+                // окно результата
+                ResultWindow wnd = new ResultWindow(json);
+                wnd.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                progress.Close();
+                MessageBox.Show("Ошибка: " + ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void RunScanner(string exePath, string ip, string startPort, string endPort)
+        {
             ProcessStartInfo psi = new ProcessStartInfo
             {
-                FileName = goExe,
-                Arguments = args,
+                FileName = exePath,
+                Arguments = $"-range {ip} -ports {startPort}-{endPort}",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
                 CreateNoWindow = true,
                 StandardOutputEncoding = Encoding.UTF8,
-                StandardErrorEncoding = Encoding.UTF8
+                WorkingDirectory = Path.GetDirectoryName(exePath) // ВАЖНО!
             };
 
-            try
+            using Process proc = new Process { StartInfo = psi };
+            proc.Start();
+
+            // читаем stdout, чтобы не было зависаний
+            while (!proc.StandardOutput.EndOfStream)
             {
-                Process proc = new Process { StartInfo = psi };
-                proc.Start();
-
-                StringBuilder output = new StringBuilder();
-
-                // Читаем stdout
-                while (!proc.StandardOutput.EndOfStream)
-                {
-                    string line = proc.StandardOutput.ReadLine();
-                    output.AppendLine(line);
-                }
-
-                // Читаем stderr
-                while (!proc.StandardError.EndOfStream)
-                {
-                    string line = proc.StandardError.ReadLine();
-                    output.AppendLine(line);
-                }
-
-                proc.WaitForExit();
-
-                // Показываем результаты в новом окне
-                ResultWindow resultWindow = new ResultWindow(output.ToString());
-                resultWindow.Show();
+                proc.StandardOutput.ReadLine();
             }
-            catch (Exception ex)
+
+            proc.WaitForExit();
+        }
+
+        private async Task WaitForFile(string path, int timeoutMs)
+        {
+            int waited = 0;
+            while (!File.Exists(path) && waited < timeoutMs)
             {
-                MessageBox.Show($"Ошибка при запуске сканера: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                await Task.Delay(100);
+                waited += 100;
             }
         }
 
         private void AboutButton_Click(object sender, RoutedEventArgs e)
         {
-            string aboutText = "Mini-Nmap GUI\nАвтор: Трушин Г.А.\nКафедра: МАИ 316\n\nИнструкция:\n1. Введите IP/CIDR/Range.\n2. Укажите порты.\n3. Нажмите 'Сканировать'.\n4. Результаты откроются в новом окне.";
-            MessageBox.Show(aboutText, "О программе", MessageBoxButton.OK, MessageBoxImage.Information);
+            AboutWindow about = new AboutWindow();
+            about.ShowDialog();
         }
     }
 }
