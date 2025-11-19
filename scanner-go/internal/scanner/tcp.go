@@ -16,7 +16,7 @@ type HostScan struct {
 	Ports []PortResult `json:"ports"`
 }
 
-// ScanPorts — сканирует все порты из списка ports
+// Сканирует все порты из списка ports
 func ScanPorts(ip string, ports []int, timeout time.Duration) HostScan {
 	results := HostScan{
 		IP:    ip,

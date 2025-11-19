@@ -15,7 +15,7 @@ import (
 
 func main() {
 
-	// ---- аргументы ----
+	// Флаги для CLI
 	ipRange := flag.String("range", "", "Диапазон IP (например 192.168.1.1-192.168.1.20 или CIDR 192.168.1.0/24)")
 	portsArg := flag.String("ports", "1-1024", "Порты (например 1-1024 или 22,80,443)")
 	outFile := flag.String("out", "results.json", "Файл для сохранения результата JSON")
@@ -28,37 +28,35 @@ func main() {
 		log.Fatal("Укажите диапазон IP через -range")
 	}
 
-	// ---- парсим диапазон IP ----
+	// Парсинг
 	ips, err := ip.ParseAny(*ipRange)
 	if err != nil {
 		log.Fatal("Ошибка в диапазоне IP: ", err)
 	}
 
-	// ---- парсим порты ----
 	ports, err := parsePorts(*portsArg)
 	if err != nil {
 		log.Fatal("Ошибка в портах: ", err)
 	}
 
-	// ---- параметры ----
+	// Параметры
 	scanTimeout := time.Duration(*timeout) * time.Millisecond
 
-	fmt.Println("Scanning started...")
-
-	// ---- СКАНИРОВАНИЕ ----
+	fmt.Println("Начало сканирования...")
+	// Сканирование
 	results := scanner.ScanAllHosts(ips, ports, scanTimeout, *workers)
 
-	// ---- СОХРАНЕНИЕ ОТЧЁТА ----
+	// Сохранение отчета
 	err = report.SaveJSON(*outFile, results)
 	if err != nil {
 		log.Fatal("Ошибка при сохранении JSON: ", err)
 	}
 
-	fmt.Println("Scanning completed!")
-	fmt.Println("Saved to:", *outFile)
+	fmt.Println("Сканичрование завершено!")
+	fmt.Println("Сохранено в:", *outFile)
 }
 
-// parsePorts — превращает "1-100" или "22,80,443" → []int
+// Превращает ввод пользователя в массив
 func parsePorts(arg string) ([]int, error) {
 	if strings.Contains(arg, "-") {
 		parts := strings.Split(arg, "-")
@@ -85,7 +83,7 @@ func parsePorts(arg string) ([]int, error) {
 		return res, nil
 	}
 
-	// список портов
+	// Список портов
 	items := strings.Split(arg, ",")
 	res := make([]int, 0, len(items))
 
