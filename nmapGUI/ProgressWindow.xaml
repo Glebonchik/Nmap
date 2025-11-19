@@ -1,22 +1,23 @@
 <Window x:Class="nmapGUI.ProgressWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Сканирование..." Height="150" Width="400"
-        WindowStartupLocation="CenterScreen"
-        ResizeMode="NoResize">
+        Title="Сканирование..." 
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        SizeToContent="WidthAndHeight"
+        WindowStyle="ToolWindow"
+        Topmost="True">
 
-    <Grid Margin="10">
+    <Grid Margin="20">
         <StackPanel>
-            <TextBlock Text="Сканирование, пожалуйста подождите..."
-                       Margin="0 0 0 10"
+            <TextBlock Text="Пожалуйста, подождите..." 
                        FontSize="16"
-                       TextAlignment="Center"/>
+                       Margin="0 0 0 10"
+                       HorizontalAlignment="Center"/>
 
-            <ProgressBar x:Name="ScanProgressBar"
+            <ProgressBar IsIndeterminate="True"
                          Height="25"
-                         IsIndeterminate="False"
-                         Minimum="0"
-                         Maximum="100"/>
+                         Width="250"/>
         </StackPanel>
     </Grid>
 </Window>

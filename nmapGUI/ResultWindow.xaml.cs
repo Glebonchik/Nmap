@@ -4,10 +4,10 @@ namespace nmapGUI
 {
     public partial class ResultWindow : Window
     {
-        public ResultWindow(string log)
+        public ResultWindow(string jsonResult)
         {
             InitializeComponent();
-            ResultTextBox.Text = log;
+            JsonTextBox.Text = jsonResult;
         }
     }
 }

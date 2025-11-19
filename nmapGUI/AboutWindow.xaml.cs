@@ -1,6 +1,6 @@
 using System.Windows;
 
-namespace MiniNmapGUI
+namespace nmapGUI
 {
     public partial class AboutWindow : Window
     {
