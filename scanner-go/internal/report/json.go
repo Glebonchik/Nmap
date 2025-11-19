@@ -7,7 +7,7 @@ import (
 	"scanner-go/internal/scanner"
 )
 
-// SaveJSON — сохраняет результаты сканирования в файл
+// Сохраняет результаты сканирования в файл
 func SaveJSON(filename string, results []scanner.HostScan) error {
 	file, err := os.Create(filename)
 	if err != nil {

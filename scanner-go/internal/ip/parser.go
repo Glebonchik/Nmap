@@ -14,7 +14,7 @@ func ParseAny(input string) ([]string, error) {
 		return fromCIDR(input)
 	}
 
-	// Диапазон IP: 192.168.0.1-192.168.0.50
+	// Диапазон IP
 	if strings.Contains(input, "-") {
 		return fromRange(input)
 	}
@@ -24,10 +24,10 @@ func ParseAny(input string) ([]string, error) {
 		return []string{input}, nil
 	}
 
-	return nil, errors.New("invalid IP format")
+	return nil, errors.New("Неверный формат Ip")
 }
 
-// --- CIDR ---
+// CIDR
 func fromCIDR(cidr string) ([]string, error) {
 	_, ipnet, err := net.ParseCIDR(cidr)
 	if err != nil {
@@ -46,17 +46,17 @@ func fromCIDR(cidr string) ([]string, error) {
 	return ips, nil
 }
 
-// --- Диапазон ---
+// диапозон
 func fromRange(r string) ([]string, error) {
 	parts := strings.Split(r, "-")
 	if len(parts) != 2 {
-		return nil, fmt.Errorf("invalid range: %s", r)
+		return nil, fmt.Errorf("Неверный диапозон: %s", r)
 	}
 
 	start := net.ParseIP(parts[0])
 	end := net.ParseIP(parts[1])
 	if start == nil || end == nil {
-		return nil, errors.New("invalid IP in range")
+		return nil, errors.New("Неверный IP в диапозоне")
 	}
 
 	var ips []string
@@ -68,7 +68,7 @@ func fromRange(r string) ([]string, error) {
 	return ips, nil
 }
 
-// --- Helpers ---
+// Помошники
 func ipEqual(a, b net.IP) bool {
 	return a.String() == b.String()
 }
